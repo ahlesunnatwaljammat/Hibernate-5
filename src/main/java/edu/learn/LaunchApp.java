@@ -1,5 +1,6 @@
-package edu.learn.config;
+package edu.learn;
 
+import edu.learn.config.DBFactory;
 import edu.learn.entities.Event;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
