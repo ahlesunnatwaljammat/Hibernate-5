@@ -21,13 +21,8 @@ public enum DBFactory {
     private static SessionFactory sessionFactory = null;
 
 
-    @PersistenceUnit
-    private EntityManagerFactory emf;
-
-    @PersistenceContext
+    private static EntityManagerFactory emf;
     private EntityManager em;
-
-
 
     private SessionFactory getSessionFactory() {
 
@@ -73,10 +68,30 @@ public enum DBFactory {
         }
     }
 
+    private static EntityManagerFactory getEntityManagerFactory() {
+        try {
+            LOCK.lock();
+
+            if(emf == null){
+                emf = Persistence.createEntityManagerFactory("TEST");
+            }
+
+            return emf;
+        } finally {
+            LOCK.unlock();
+        }
+    }
+
+
     public EntityManager getEntityManager() {
-        this.emf = Persistence.createEntityManagerFactory("TEST");
-        this.em = this.emf.createEntityManager();
-        return this.em;
+
+        if (this.em != null && this.em.isOpen()) {
+            return this.em;
+        } else {
+            this.em = getEntityManagerFactory().createEntityManager();
+            return this.em;
+        }
+
     }
 
 }

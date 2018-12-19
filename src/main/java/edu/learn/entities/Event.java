@@ -15,6 +15,6 @@ import java.time.Instant;
 public class Event {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private long eventId;
-    private String event;
+    private String eventName;
     private Instant date;
 }
