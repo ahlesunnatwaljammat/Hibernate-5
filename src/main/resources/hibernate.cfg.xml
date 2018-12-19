@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+
+    <session-factory>
+        <!-- Oracle Database connection settings -->
+        <!-- Oracle pool database connection settings using data source-->
+
+        <!--<property name="hibernate.current_session_context_class">thread</property>
+        <property name="hibernate.connection.provider_class">com.zaxxer.hikari.hibernate.HikariConnectionProvider</property>
+        <property name="hikari.maximumPoolSize">${urebal.db.pool_size}</property>
+        <property name="hikari.connectionTestQuery">select 1 from dual</property>
+        <property name="hikari.idleTimeout">30000</property>-->
+        <!--<property name="hikari.driverClassName">oracle.jdbc.driver.OracleDriver</property>-->
+        <!--<property name="hikari.testOnBorrow">true</property>-->
+        <!--<property name="hikari.testOnReturn">true</property>-->
+        <!--<property name="hikari.testWhileIdle">true</property>-->
+        <!--<property name="hikari.timeBetweenEvictionRunsMillis">1000*60*5</property>-->
+
+
+        <!--  Oracle database connection settings using direct connection -->
+        <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+        <property name="hibernate.connection.username">root</property>
+        <property name="hibernate.connection.password">Password1</property>
+        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/TEST</property>
+
+        <property name="dialect">org.hibernate.dialect.MySQL8Dialect</property>
+
+        <!-- JDBC connection pool (use the built-in) -->
+        <!-- <property name="connection.pool_size">1</property> -->
+        <property name="hibernate.jdbc.batch_size">50</property>
+
+        <property name="hibernate.hbm2ddl.auto">create-drop</property>
+
+        <!-- Enable the second-level cache -->
+        <property name="cache.provider_class">org.hibernate.cache.internal.SimpleCacheKeysFactory</property>
+
+        <!-- Prevent hibernate to generate hibernate_sequence -->
+        <property name="hibernate.id.new_generator_mappings">false</property>
+
+        <!-- Echo all executed SQL to stdout -->
+        <property name="show_sql">true</property>
+        <property name="format_sql">true</property>
+        <property name="hibernate.connection.autocommit">false</property>
+
+    </session-factory>
+</hibernate-configuration>
