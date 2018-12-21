@@ -16,12 +16,12 @@
         <class>edu.learn.entities.Event</class>
 
         <properties>
-            <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver" />
-            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/TEST" />
+            <property name="javax.persistence.jdbc.driver" value="${db.driverClass}" />
+            <property name="javax.persistence.jdbc.url" value="${db.jdbcUrl}" />
 
-            <property name="javax.persistence.jdbc.user" value="root" />
+            <property name="javax.persistence.jdbc.user" value="${db.user}" />
 
-            <property name="javax.persistence.jdbc.password" value="Password1" />
+            <property name="javax.persistence.jdbc.password" value="${db.password}" />
 
             <property name="hibernate.show_sql" value="true" />
 

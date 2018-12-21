@@ -17,16 +17,19 @@ public class LaunchApp {
         DBFactory factory = DBFactory.INSTANCE;
         Session session = factory.getSession();
 
+
         Event event = new Event();
         event.setEventName("Meeting 609");
         event.setDate(Instant.now());
         Transaction transaction = session.beginTransaction();
         session.save(event);
         transaction.commit();
+        session.close();
 
-
+        session = factory.getSession();
         session.createQuery("from Event", Event.class).stream().forEach(System.out::println);
         session.close();
+        factory.shutdownSessionFactory();
         log.info("===================================");
 
         EntityManager entityManager = factory.getEntityManager();
@@ -44,5 +47,8 @@ public class LaunchApp {
         entityManager = factory.getEntityManager();
         entityManager.createQuery("from Event", Event.class).getResultList().stream().forEach(System.out::println);
         entityManager.close();
+        factory.shutdownEntityManagerFactory();
+
+
     }
 }

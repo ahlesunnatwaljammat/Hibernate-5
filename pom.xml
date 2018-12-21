@@ -8,6 +8,10 @@
     <artifactId>hibernate5</artifactId>
     <version>0.0.0.1</version>
 
+    <properties>
+        <mysql.driver.version>8.0.13</mysql.driver.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -21,10 +25,11 @@
             <version>5.4.0.Final</version>
         </dependency>
 
+        <!-- Needed while running application from IDE -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.13</version>
+            <version>${mysql.driver.version}</version>
         </dependency>
 
         <dependency>
@@ -32,36 +37,197 @@
             <artifactId>lombok</artifactId>
             <version>1.18.4</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.1.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.1.0</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
+
+    <profiles>
+        <!-- The Configuration of the development profile -->
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <!--
+                    Specifies the build.profile.id property that must be equal than the name of
+                    the directory that contains the profile specific configuration file.
+                    Because the name of the directory that contains the configuration file of the
+                    development profile is dev, we must set the value of the build.profile.id
+                    property to dev.
+                -->
+                <build.profile.id>dev</build.profile.id>
+                <!--
+                    Only unit tests are run when the development profile is active
+                -->
+                <skip.integration.tests>false</skip.integration.tests>
+                <skip.unit.tests>false</skip.unit.tests>
+
+                <db.driverClass>org.h2.Driver</db.driverClass>
+                <db.jdbcUrl>jdbc:h2:file:~/test;IFEXISTS=TRUE</db.jdbcUrl>
+                <db.user>sa</db.user>
+                <db.password></db.password>
+                <db.dialect>org.hibernate.dialect.H2Dialect</db.dialect>
+            </properties>
+
+            <dependencies>
+                <dependency>
+                    <groupId>com.h2database</groupId>
+                    <artifactId>h2</artifactId>
+                    <version>1.4.197</version>
+                </dependency>
+            </dependencies>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.flywaydb</groupId>
+                        <artifactId>flyway-maven-plugin</artifactId>
+                        <version>5.2.4</version>
+                        <configuration>
+                            <url>jdbc:h2:file:~/test</url>
+                            <user>sa</user>
+                            <locations>
+                                <location>filesystem:src/main/resources/db/migration/h2</location>
+                            </locations>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>com.h2database</groupId>
+                                <artifactId>h2</artifactId>
+                                <version>1.4.197</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+
+                    <!--<plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <configuration>
+                                    <archive>
+                                        <manifest>
+                                            <mainClass>
+                                                edu.learn.LaunchApp
+                                            </mainClass>
+                                        </manifest>
+                                    </archive>
+                                    <descriptorRefs>
+                                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                                    </descriptorRefs>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>-->
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- The Configuration of the test profile -->
+        <profile>
+            <id>test</id>
+            <properties>
+                <!--
+                    Specifies the build.profile.id property that must be equal than the name of
+                    the directory that contains the profile specific configuration file.
+                    Because the name of the directory that contains the configuration file of the
+                    integration-test profile is integration-test, we must set the value of the
+                    build.profile.id property to integration-test.
+                -->
+                <build.profile.id>test</build.profile.id>
+                <!--
+                    Only integration tests are run when the integration-test profile is active
+                -->
+                <!--<skip.integration.tests>false</skip.integration.tests>
+                <skip.unit.tests>false</skip.unit.tests>-->
+
+                <db.driverClass>com.mysql.cj.jdbc.Driver</db.driverClass>
+                <db.jdbcUrl>jdbc:mysql://localhost:3306/TEST?useSSL=false</db.jdbcUrl>
+                <db.user>root</db.user>
+                <db.password>Password1</db.password>
+                <db.dialect>org.hibernate.dialect.MySQL8Dialect</db.dialect>
+            </properties>
+
+            <dependencies>
+                <dependency>
+                    <groupId>mysql</groupId>
+                    <artifactId>mysql-connector-java</artifactId>
+                    <version>${mysql.driver.version}</version>
+                </dependency>
+            </dependencies>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.flywaydb</groupId>
+                        <artifactId>flyway-maven-plugin</artifactId>
+                        <version>5.2.4</version>
+                        <configuration>
+                            <url>jdbc:mysql://localhost:3306/TEST?useSSL=false&amp;allowPublicKeyRetrieval=true</url>
+                            <user>root</user>
+                            <password>Password1</password>
+                            <locations>
+                                <location>filesystem:src/main/resources/db/migration/mysql</location>
+                            </locations>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>mysql</groupId>
+                                <artifactId>mysql-connector-java</artifactId>
+                                <version>${mysql.driver.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <build>
+        <resources>
+            <resource>
+                <filtering>true</filtering>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <!--<include>hibernate.cfg.xml</include> &lt;!&ndash; the path to hibernate.cfg.xml &ndash;&gt;
+                    <include>log4j2.xml</include> &lt;!&ndash; the path to log4j2.xml &ndash;&gt;
+                    <include>META-INF/persistence.xml</include> &lt;!&ndash; the path to persistence.xml &ndash;&gt;-->
+                    <include>**.xml</include>
+                    <include>**/*.xml</include>
+                    <include>**/**/.sql</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <archive>
-                                <manifest>
-                                    <mainClass>
-                                        edu.learn.rxjdbc.LaunchApp
-                                    </mainClass>
-                                </manifest>
-                            </archive>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
-                        </configuration>
-                    </execution>
-                </executions>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M2</version>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
                 <configuration>
                     <source>11</source>
                     <target>11</target>

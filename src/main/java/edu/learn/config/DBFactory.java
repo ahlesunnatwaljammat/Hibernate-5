@@ -18,50 +18,66 @@ public enum DBFactory {
     INSTANCE;
 
     private static final Lock LOCK = new ReentrantLock(true);
+
     private static SessionFactory sessionFactory = null;
+    private static StandardServiceRegistry standardRegistry;
+    private Session session;
 
 
     private static EntityManagerFactory emf;
     private EntityManager em;
 
-    private SessionFactory getSessionFactory() {
+    private static SessionFactory getSessionFactory() {
 
-        StandardServiceRegistry standardRegistry = new StandardServiceRegistryBuilder()
-                .configure( "/hibernate.cfg.xml" )
-                .build();
+        if( sessionFactory == null ) {
+            standardRegistry = new StandardServiceRegistryBuilder()
+                    .configure( "/hibernate.cfg.xml" )
+                    .build();
 
-        Metadata metadata = new MetadataSources( standardRegistry )
-                .addAnnotatedClass( Event.class )
-                //.addPackage("edu.learn.entities")
-                /*.addAnnotatedClassName( "org.hibernate.example.Customer" )
-                .addResource( "org/hibernate/example/Order.hbm.xml" )
-                .addResource( "org/hibernate/example/Product.orm.xml" )*/
-                .getMetadataBuilder()
-                .applyImplicitNamingStrategy( ImplicitNamingStrategyJpaCompliantImpl.INSTANCE )
-                .build();
+            Metadata metadata = new MetadataSources( standardRegistry )
+                    .addAnnotatedClass( Event.class )
+                    //.addPackage("edu.learn.entities")
+                    /*.addAnnotatedClassName( "org.hibernate.example.Customer" )
+                    .addResource( "org/hibernate/example/Order.hbm.xml" )
+                    .addResource( "org/hibernate/example/Product.orm.xml" )*/
+                    .getMetadataBuilder()
+                    .applyImplicitNamingStrategy( ImplicitNamingStrategyJpaCompliantImpl.INSTANCE )
+                    .build();
 
-        SessionFactoryBuilder sessionFactoryBuilder = metadata.getSessionFactoryBuilder();
+            SessionFactoryBuilder sessionFactoryBuilder = metadata.getSessionFactoryBuilder();
 
-        // Supply a SessionFactory-level Interceptor
-        //sessionFactoryBuilder.applyInterceptor( new CustomSessionFactoryInterceptor() );
+            // Supply a SessionFactory-level Interceptor
+            //sessionFactoryBuilder.applyInterceptor( new CustomSessionFactoryInterceptor() );
 
-        // Add a custom observer
-        //sessionFactoryBuilder.addSessionFactoryObservers( new CustomSessionFactoryObserver() );
+            // Add a custom observer
+            //sessionFactoryBuilder.addSessionFactoryObservers( new CustomSessionFactoryObserver() );
 
-        // Apply a CDI BeanManager ( for JPA event listeners )
-        //sessionFactoryBuilder.applyBeanManager( getBeanManager() );
+            // Apply a CDI BeanManager ( for JPA event listeners )
+            //sessionFactoryBuilder.applyBeanManager( getBeanManager() );
 
-        return sessionFactoryBuilder.build();
+            sessionFactory = sessionFactoryBuilder.build();
+            return sessionFactory;
+        } else {
+            return sessionFactory;
+        }
+    }
+
+    public void shutdownSessionFactory() {
+        if(sessionFactory.isOpen()){
+            sessionFactory.close();
+            StandardServiceRegistryBuilder.destroy(standardRegistry);
+        }
     }
 
     public Session getSession() {
         try {
             LOCK.lock();
-            Session session = this.getSessionFactory().openSession();
-            if(session.isOpen()){
+
+            if(null != this.session && this.session.isOpen()){
                 return session;
             } else {
-                return sessionFactory.openSession();
+                this.session = this.getSessionFactory().openSession();
+                return this.session;
             }
         }finally {
             LOCK.unlock();
@@ -82,6 +98,11 @@ public enum DBFactory {
         }
     }
 
+    public void shutdownEntityManagerFactory() {
+        if(emf.isOpen()){
+            emf.close();
+        }
+    }
 
     public EntityManager getEntityManager() {
 
